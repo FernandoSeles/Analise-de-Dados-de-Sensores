@@ -40,7 +40,8 @@ int main() {
 			break;
 }		
 		case 3:
-			exibir_leituras() << "As leituras sao:" << endl;
+			cout << "As leituras sao:" << endl;
+			exibir_leituras();
 			break;
 		
 		case 4:
