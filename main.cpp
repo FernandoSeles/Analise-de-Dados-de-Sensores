@@ -3,12 +3,9 @@
 
 using namespace std;
 
-void exibir_leituras()
+void exibir_leituras(int dia, int mes, int ano, int hora, float temp, float umid, float pressao)
 {
 	ifstream entrada("dados.txt");
-
-	int dia, mes, ano, hora;
-	float temp, umid, pressao;
 
 	while (entrada >> dia >> mes >> ano >> hora >> temp >> umid >> pressao)
 	{
@@ -63,7 +60,7 @@ int main()
 
 			case 3:
 				cout << "As leituras sao:" << endl;
-				exibir_leituras();
+				exibir_leituras(dia, mes, ano, hora, temp, umid, pressao);
 				break;
 
 			case 4:
