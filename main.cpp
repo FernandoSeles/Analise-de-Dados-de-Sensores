@@ -23,8 +23,6 @@ void exibir_leituras()
 int main()
 {
 	int opcao;
-	// Comentario teste
-	// Comentario 2
 
 	do
 	{
