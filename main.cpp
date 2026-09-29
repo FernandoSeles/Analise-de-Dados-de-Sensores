@@ -23,7 +23,7 @@ int main() {
 	int opcao;
 	
 	do{
-	cout << "===== MENU PRINCIPAL =====" << endl;
+		cout << "===== MENU PRINCIPAL =====" << endl;
 	cout << "1. Inserir Leitura" << endl;
 	cout << "2. Calcular Media" << endl;
 	cout << "3. Exibir Leituras" << endl;
