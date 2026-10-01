@@ -3,9 +3,21 @@
 
 using namespace std;
 
-void exibir_leituras(int dia, int mes, int ano, int hora, float temp, float umid, float pressao)
-{
-	ifstream entrada("dados.txt");
+void inserir_leituras (int dia, int mes, int ano, int hora, float temp, float umid, float pressao) {
+
+	ofstream saida ("../dados.txt", ios::app);	/* ../ faz o programa procurar dados.txt na pasta principal e não em output, ou seja, volta uma pasta */
+												/* ios::app acrescenta as leituras no final sem apagar as leituras anteriores */
+	saida << endl << endl;
+	saida << dia << " " << mes << " " << ano << endl << hora;
+	saida << endl << temp << endl << umid << endl << pressao;
+
+	saida.close();
+
+}
+
+void exibir_leituras (int dia, int mes, int ano, int hora, float temp, float umid, float pressao) {
+	
+	ifstream entrada ("dados.txt");
 
 	while (entrada >> dia >> mes >> ano >> hora >> temp >> umid >> pressao)
 	{
@@ -15,6 +27,8 @@ void exibir_leituras(int dia, int mes, int ano, int hora, float temp, float umid
 		cout << "Umidade: " << umid << "%" << endl;
 		cout << "Pressao: " << pressao << " atm" << endl;
 	}
+
+	entrada.close();
 }
 
 int main()
@@ -23,17 +37,17 @@ int main()
 	int dia, mes, ano, hora;
 	float temp, umid, pressao;
 
-	while (controle == 1)
+	while (controle)
 	{
 		cout << "===== SEJA BEM VINDO =====" << endl;
 		cout << "Caso queira ter acesso ao nosso menu, digite 1." << endl;
-		cout << "Se deseja encerrar o programa, digite 0." << endl
-			 << "Digite sua opcao: ";
+		cout << "Se deseja encerrar o programa, digite 0." << endl;
+		cout << "Digite sua opcao: ";
 		cin >> controle;
 
 		if (controle)
 		{
-			cout << "===== MENU PRINCIPAL =====" << endl;
+			cout << endl << "===== MENU PRINCIPAL =====" << endl;
 			cout << "1. Inserir Leitura" << endl;
 			cout << "2. Calcular Media" << endl;
 			cout << "3. Exibir Leituras" << endl;
@@ -44,13 +58,15 @@ int main()
 			{
 			case 1:
 
-				cout << "Data (Dia Mes Ano)" << endl;
-				cout << "Hora" << endl
-					 << "Temperatura (Graus Celsius)" << endl;
-				cout << "Umidade relativa do ar (Porcentagem)" << endl
-					 << "Pressao (atm)" << endl;
+				cout << endl << "1. Data (dia mes ano)" << endl;
+				cout << "2. Hora (hora)" << endl << "3. Temperatura (graus Celsius)" << endl;
+				cout << "4. Umidade relativa do ar (porcentagem)" << endl << "5. Pressao (atm)" << endl;
 				cout << "Informe os dados nessa ordem: ";
+				
 				cin >> dia >> mes >> ano >> hora >> temp >> umid >> pressao;
+
+				inserir_leituras (dia, mes, ano, hora, temp, umid, pressao);
+
 				cout << endl;
 				break;
 
