@@ -1,29 +1,53 @@
 #include <iostream>
 #include <fstream>
 #include <cstring>
+#include <ctime>
 
 using namespace std;
 
-void inserir_leituras (string nomeTeste, int dia, int mes, int ano, int hora, float temp, float umid, float pressao) {
+bool ler_data (istream& in, tm& datetime){
+	int mes;
+
+	datetime = tm{};
+	if (!(in >> datetime.tm_mday >> mes >>  datetime.tm_year >> datetime.tm_hour)) return false;
+
+	datetime.tm_mon = mes - 1;
+	datetime.tm_year = datetime.tm_year - 1900;
+	datetime.tm_isdst = -1;
+	return true;
+}
+
+string formatar_data (tm datetime) {
+	char output[50];
+	strftime(output, 50, "%d/%m/%Y %Hh", &datetime);
+	return output;
+
+}
+
+bool ler_leitura (istream& in, tm& datetime, float& temp, float& umid, float& pressao) {
+	string nome;
+
+	return (in >> ws && getline(in, nome) && ler_data(in, datetime) && in >> temp >> umid >> pressao);
+}
+
+void inserir_leituras (string nomeTeste, tm datetime, float temp, float umid, float pressao) {
 
 	ofstream saida ("../dados.txt", ios::app);	/* ../ faz o programa procurar dados.txt na pasta principal e não em output, ou seja, volta uma pasta */
 												/* ios::app acrescenta as leituras no final sem apagar as leituras anteriores */
 	saida << endl << endl;
-	saida << nomeTeste << endl << dia << " " << mes << " " << ano << endl << hora;
+	saida << nomeTeste << endl << datetime.tm_mday << " " << datetime.tm_mon + 1 << " " << datetime.tm_year + 1900 << endl << datetime.tm_hour;	
 	saida << endl << temp << endl << umid << endl << pressao;
 
 	saida.close();
 
 }
 
-void exibir_leituras (int dia, int mes, int ano, int hora, float temp, float umid, float pressao) {
+void exibir_leituras (tm datetime, float temp, float umid, float pressao) {
 	
-	ifstream entrada ("dados.txt");
+	ifstream entrada ("../dados.txt");
 
-	while (entrada >> dia >> mes >> ano >> hora >> temp >> umid >> pressao)
-	{
-		cout << "Data: " << dia << "/" << mes << "/" << ano << endl;
-		cout << "Hora: " << hora << "h" << endl;
+		while (ler_leitura(entrada, datetime, temp, umid, pressao))	{
+		cout << "Data: " << formatar_data(datetime) << endl;
 		cout << "Temperatura: " << temp << " graus Celsius" << endl;
 		cout << "Umidade: " << umid << " %" << endl;
 		cout << "Pressao: " << pressao << " atm" << endl << endl;
@@ -34,16 +58,16 @@ void exibir_leituras (int dia, int mes, int ano, int hora, float temp, float umi
 
 //	FUNÇÃO PARA CALCULAR A MÉDIA DAS TEMPERATURAS
 
-float media_temperatura (int dia, int mes, int ano, int hora, float temp, float umid, float pressao) {
+float media_temperatura (tm datetime, float temp, float umid, float pressao) {
 	float media_temp;
 	float soma_temp = 0.0;
 	int quantidade = 0;
 
-	ifstream entrada ("dados.txt");
+	ifstream entrada ("../dados.txt");
 
 	// WHILE: Enquanto houver dados no arquivo, ele vai somando as temperaturas e contando a quantidade de leituras
 
-	while (entrada >> dia >> mes >> ano >> hora >> temp >> umid >> pressao) {
+	while (ler_leitura(entrada, datetime, temp, umid, pressao)) {
 		soma_temp += temp;
 		quantidade++;
 	}
@@ -58,16 +82,16 @@ float media_temperatura (int dia, int mes, int ano, int hora, float temp, float 
 
 // FUNÇÃO PARA CALCULAR A MÉDIA DAS UMIDADES
 
-float media_umidade (int dia, int mes, int ano, int hora, float temp, float umid, float pressao) {
+float media_umidade (tm datetime, float temp, float umid, float pressao) {
 	float media_umid;
 	float soma_umid = 0.0;
 	int quantidade = 0;
 
-	ifstream entrada ("dados.txt");
+	ifstream entrada ("../dados.txt");
 
 	// WHILE: Enquanto houver dados no arquivo, ele vai somando as umidades e contando a quantidade de leituras
 
-	while (entrada >> dia >> mes >> ano >> hora >> temp >> umid >> pressao) {
+	while (ler_leitura(entrada, datetime, temp, umid, pressao)) {
 		soma_umid += umid;
 		quantidade++;
 	}
@@ -82,16 +106,16 @@ float media_umidade (int dia, int mes, int ano, int hora, float temp, float umid
 
 // FUNÇÃO PARA CALCULAR A MÉDIA DAS PRESSÕES
 
-float media_pressao (int dia, int mes, int ano, int hora, float temp, float umid, float pressao) {
+float media_pressao (tm datetime, float temp, float umid, float pressao) {
 	float media_pressao;
 	float soma_pressao = 0.0;
 	int quantidade = 0;
 
-	ifstream entrada ("dados.txt");
+	ifstream entrada ("../dados.txt");
 
 	// WHILE: Enquanto houver dados no arquivo, ele vai somando as pressões e contando a quantidade de leituras
 
-	while (entrada >> dia >> mes >> ano >> hora >> temp >> umid >> pressao) {
+	while (ler_leitura(entrada, datetime, temp, umid, pressao)) {
 		soma_pressao += pressao;
 		quantidade++;
 	}
@@ -108,7 +132,7 @@ int main()
 {
 	int opcao, controle = 1;
 	string nomeTeste;
-	int dia, mes, ano, hora;
+	tm datetime;
 	float temp, umid, pressao;
 
 	while (controle)
@@ -140,24 +164,25 @@ int main()
 				cin.ignore();
 
 				getline (cin, nomeTeste);
-				cin >> dia >> mes >> ano >> hora >> temp >> umid >> pressao;
+				ler_data (cin, datetime);
+				cin >> temp >> umid >> pressao;
 
-				inserir_leituras (nomeTeste, dia, mes, ano, hora, temp, umid, pressao);
+				inserir_leituras (nomeTeste, datetime, temp, umid, pressao);
 
 				cout << endl;
 				break;
 
 			case 2:
 				cout << "===== MEDIA =====" << endl;
-				cout << "Media Temperatura: " << media_temperatura(dia, mes, ano, hora, temp, umid, pressao) << " graus Celsius" << endl;
-				cout << "Media Umidade: " << media_umidade(dia, mes, ano, hora, temp, umid, pressao) << " %" << endl;
-				cout << "Media Pressao: " << media_pressao(dia, mes, ano, hora, temp, umid, pressao) << " atm" << endl;
+				cout << "Media Temperatura: " << media_temperatura(datetime, temp, umid, pressao) << " graus Celsius" << endl;
+				cout << "Media Umidade: " << media_umidade(datetime, temp, umid, pressao) << " %" << endl;
+				cout << "Media Pressao: " << media_pressao(datetime, temp, umid, pressao) << " atm" << endl;
 				cout << endl;
 				break;
 
 			case 3:
 				cout << "===== LEITURAS =====" << endl;
-				exibir_leituras(dia, mes, ano, hora, temp, umid, pressao);
+				exibir_leituras(datetime, temp, umid, pressao);
 				cout << endl;
 				break;
 
