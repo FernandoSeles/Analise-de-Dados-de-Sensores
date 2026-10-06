@@ -1,14 +1,15 @@
 #include <iostream>
 #include <fstream>
+#include <cstring>
 
 using namespace std;
 
-void inserir_leituras (int dia, int mes, int ano, int hora, float temp, float umid, float pressao) {
+void inserir_leituras (string nomeTeste, int dia, int mes, int ano, int hora, float temp, float umid, float pressao) {
 
 	ofstream saida ("../dados.txt", ios::app);	/* ../ faz o programa procurar dados.txt na pasta principal e não em output, ou seja, volta uma pasta */
 												/* ios::app acrescenta as leituras no final sem apagar as leituras anteriores */
 	saida << endl << endl;
-	saida << dia << " " << mes << " " << ano << endl << hora;
+	saida << nomeTeste << endl << dia << " " << mes << " " << ano << endl << hora;
 	saida << endl << temp << endl << umid << endl << pressao;
 
 	saida.close();
@@ -23,9 +24,9 @@ void exibir_leituras (int dia, int mes, int ano, int hora, float temp, float umi
 	{
 		cout << "Data: " << dia << "/" << mes << "/" << ano << endl;
 		cout << "Hora: " << hora << "h" << endl;
-		cout << "Temperatura: " << temp << " °C" << endl;
-		cout << "Umidade: " << umid << "%" << endl;
-		cout << "Pressao: " << pressao << " atm" << endl;
+		cout << "Temperatura: " << temp << " graus Celsius" << endl;
+		cout << "Umidade: " << umid << " %" << endl;
+		cout << "Pressao: " << pressao << " atm" << endl << endl;
 	}
 
 	entrada.close();
@@ -106,6 +107,7 @@ float media_pressao (int dia, int mes, int ano, int hora, float temp, float umid
 int main()
 {
 	int opcao, controle = 1;
+	string nomeTeste;
 	int dia, mes, ano, hora;
 	float temp, umid, pressao;
 
@@ -130,21 +132,24 @@ int main()
 			{
 			case 1:
 
-				cout << endl << "1. Data (dia mes ano)" << endl;
-				cout << "2. Hora (hora)" << endl << "3. Temperatura (graus Celsius)" << endl;
-				cout << "4. Umidade relativa do ar (porcentagem)" << endl << "5. Pressao (atm)" << endl;
+				cout << endl << "1. Nome do teste de analise de dados" << endl << "2. Data (dia mes ano)" << endl;
+				cout << "2. Hora (hora)" << endl << "4. Temperatura (graus Celsius)" << endl;
+				cout << "5. Umidade relativa do ar (porcentagem)" << endl << "6. Pressao (atm)" << endl;
 				cout << "Informe os dados nessa ordem: ";
 				
+				cin.ignore();
+
+				getline (cin, nomeTeste);
 				cin >> dia >> mes >> ano >> hora >> temp >> umid >> pressao;
 
-				inserir_leituras (dia, mes, ano, hora, temp, umid, pressao);
+				inserir_leituras (nomeTeste, dia, mes, ano, hora, temp, umid, pressao);
 
 				cout << endl;
 				break;
 
 			case 2:
 				cout << "===== MEDIA =====" << endl;
-				cout << "Media Temperatura: " << media_temperatura(dia, mes, ano, hora, temp, umid, pressao) << " C" << endl;
+				cout << "Media Temperatura: " << media_temperatura(dia, mes, ano, hora, temp, umid, pressao) << " graus Celsius" << endl;
 				cout << "Media Umidade: " << media_umidade(dia, mes, ano, hora, temp, umid, pressao) << " %" << endl;
 				cout << "Media Pressao: " << media_pressao(dia, mes, ano, hora, temp, umid, pressao) << " atm" << endl;
 				cout << endl;
