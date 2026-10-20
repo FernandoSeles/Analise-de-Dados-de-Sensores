@@ -128,6 +128,56 @@ float media_pressao (tm datetime, float temp, float umid, float pressao) {
 	return media_pressao;
 }
 
+	// ALOCAÇÃO DINÂMICA
+float* carregar_temperaturas(int& n) {
+	tm dt;
+	float t, u, p;
+	n = 0;
+
+	ifstream entrada ("../dados.txt");
+	while (ler_leitura(entrada, dt, t, u, p)) n++;		
+
+	float* v = new float[n];							
+	entrada.clear();
+	entrada.seekg(0);									
+
+	for (int i = 0; i < n; i++)
+		ler_leitura(entrada, dt, v[i], u, p);			
+
+	entrada.close();
+	return v;											
+}
+
+// RECURSÃO
+float soma_recursiva(float* v, int n) {
+	if (n == 0) return 0;								
+	return v[n-1] + soma_recursiva(v, n-1);				
+}
+
+
+void ordenar(float* v, int n) {
+	for (int i = 1; i < n; i++) {
+		float x = v[i];
+		int j = i - 1;
+		while (j >= 0 && v[j] > x) {
+			v[j+1] = v[j];
+			j--;
+		}
+		v[j+1] = x;
+	}
+}
+
+// BUSCA BINÁRIA
+int busca_binaria(float* v, int n, float alvo) {
+	int ini = 0, fim = n - 1;
+	while (ini <= fim) {
+		int meio = (ini + fim) / 2;
+		if (v[meio] == alvo) return meio;
+		if (v[meio] < alvo) ini = meio + 1;
+		else fim = meio - 1;
+	}
+	return -1;
+}
 int main()
 {
 	int opcao, controle = 1;
