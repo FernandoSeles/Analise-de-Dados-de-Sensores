@@ -178,6 +178,7 @@ int busca_binaria(float* v, int n, float alvo) {
 	}
 	return -1;
 }
+
 int main()
 {
 	int opcao, controle = 1;
