@@ -5,15 +5,17 @@
 
 using namespace std;
 
-bool ler_data (istream& in, tm& datetime){
+bool ler_data (istream& in, tm& datetime){ /* istream é um tipo que representa um fluxo de entrada que admite diferentes fontes.
+	Tanto de teclado, quanto de arquivos */
 	int mes;
 
-	datetime = tm{};
+	datetime = tm{}; // Essa linha inicializa todos os campos numéricos da struct tm com zero.
 	if (!(in >> datetime.tm_mday >> mes >>  datetime.tm_year >> datetime.tm_hour)) return false;
-
+	// Verifica se a leitura não foi bem-sucedida. Se falhar, a função executa return false; e termina imediatamente.
 	datetime.tm_mon = mes - 1;
 	datetime.tm_year = datetime.tm_year - 1900;
-	datetime.tm_isdst = -1;
+	datetime.tm_isdst = -1; /* tm_isdt = -1 faz com que a informação de horário de verão fique desconhecida. Faz com que a biblioteca 
+	determine essa informação em futuras conevrsões de data com esse campo*/
 	return true;
 }
 
