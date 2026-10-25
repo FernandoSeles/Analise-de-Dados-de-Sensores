@@ -5,17 +5,22 @@
 
 using namespace std;
 
-bool ler_dataHora (istream& in, tm& dataHora){ /* istream é um tipo que representa um fluxo de entrada que admite diferentes fontes.
-	Tanto de teclado, quanto de arquivos */
-	int mes;
+bool ler_dataHora (istream& in, tm& dataHora){ 
+/* istream é uma classe que representa um fluxo de entrada que admite diferentes fontes.
+Tanto de teclado, quanto de arquivos */
 
+	int mes;
 	dataHora = tm{}; // Essa linha inicializa todos os campos numéricos da struct tm com zero.
+
 	if (!(in >> dataHora.tm_mday >> mes >>  dataHora.tm_year >> dataHora.tm_hour)) return false;
 	// Verifica se a leitura não foi bem-sucedida. Se falhar, a função executa return false; e termina imediatamente.
+
 	dataHora.tm_mon = mes - 1;
 	dataHora.tm_year = dataHora.tm_year - 1900;
-	dataHora.tm_isdst = -1; /* tm_isdt = -1 faz com que a informação de horário de verão fique desconhecida. Faz com que a biblioteca 
-	determine essa informação em futuras conevrsões de data com esse campo*/
+	dataHora.tm_isdst = -1; 
+	/* tm_isdt = -1 faz com que a informação de horário de verão fique desconhecida. Faz com que a biblioteca 
+	determine essa informação em futuras conversões de data com esse campo */
+
 	return true;
 }
 
@@ -32,13 +37,15 @@ bool ler_leitura (istream& in, tm& dataHora, float& temp, float& umid, float& pr
 	string nome;
 
 	return (in >> ws && getline(in, nome) && ler_dataHora(in, dataHora) && in >> temp >> umid >> pressao);
-	
+	// ws (white space) retira qualquer quebra de linha ou espaço em branco antes do getline 
 }
 
 void inserir_leituras (string nomeTeste, tm dataHora, float temp, float umid, float pressao) {
 
-	ofstream saida ("../dados.txt", ios::app);	/* ../ faz o programa procurar dados.txt na pasta principal e não em output, ou seja, volta uma pasta */
-												/* ios::app acrescenta as leituras no final sem apagar as leituras anteriores */
+	ofstream saida ("../dados.txt", ios::app);	
+	// ../ faz o programa procurar dados.txt na pasta principal e não em output, ou seja, volta uma pasta 
+	// ios::app acrescenta as leituras no final sem apagar as leituras anteriores 
+
 	saida << endl << endl;
 	saida << nomeTeste << endl << dataHora.tm_mday << " " << dataHora.tm_mon + 1 << " " << dataHora.tm_year + 1900 << endl << dataHora.tm_hour;	
 	saida << endl << temp << endl << umid << endl << pressao;
@@ -49,9 +56,9 @@ void inserir_leituras (string nomeTeste, tm dataHora, float temp, float umid, fl
 
 void exibir_leituras (tm dataHora, float temp, float umid, float pressao) {
 	
-	ifstream entrada ("../dados.txt");
+	ifstream entrada("../dados.txt");
 
-		while (ler_leitura(entrada, dataHora, temp, umid, pressao))	{
+	while (ler_leitura(entrada, dataHora, temp, umid, pressao))	{
 		cout << "Data: " << formatar_data(dataHora) << endl;
 		cout << "Temperatura: " << temp << " graus Celsius" << endl;
 		cout << "Umidade: " << umid << " %" << endl;
@@ -61,16 +68,17 @@ void exibir_leituras (tm dataHora, float temp, float umid, float pressao) {
 	entrada.close();
 }
 
-//	FUNÇÃO PARA CALCULAR A MÉDIA DAS TEMPERATURAS
+// Função para calcular a média das temperaturas 
 
 float media_temperatura (tm dataHora, float temp, float umid, float pressao) {
+	
 	float media_temp;
 	float soma_temp = 0.0;
 	int quantidade = 0;
 
 	ifstream entrada ("../dados.txt");
 
-	// WHILE: Enquanto houver dados no arquivo, ele vai somando as temperaturas e contando a quantidade de leituras
+	// While: Enquanto houver dados no arquivo, ele vai somando as temperaturas e contando a quantidade de leituras
 
 	while (ler_leitura(entrada, dataHora, temp, umid, pressao)) {
 		soma_temp += temp;
@@ -85,7 +93,7 @@ float media_temperatura (tm dataHora, float temp, float umid, float pressao) {
 	return media_temp;
 }
 
-// FUNÇÃO PARA CALCULAR A MÉDIA DAS UMIDADES
+// Função para calcular a média das umidades 
 
 float media_umidade (tm dataHora, float temp, float umid, float pressao) {
 	float media_umid;
@@ -94,7 +102,7 @@ float media_umidade (tm dataHora, float temp, float umid, float pressao) {
 
 	ifstream entrada ("../dados.txt");
 
-	// WHILE: Enquanto houver dados no arquivo, ele vai somando as umidades e contando a quantidade de leituras
+	// While: Enquanto houver dados no arquivo, ele vai somando as umidades e contando a quantidade de leituras
 
 	while (ler_leitura(entrada, dataHora, temp, umid, pressao)) {
 		soma_umid += umid;
@@ -109,7 +117,7 @@ float media_umidade (tm dataHora, float temp, float umid, float pressao) {
 	return media_umid;
 }
 
-// FUNÇÃO PARA CALCULAR A MÉDIA DAS PRESSÕES
+// Função para calcular a média das pressões
 
 float media_pressao (tm dataHora, float temp, float umid, float pressao) {
 	float media_pressao;
@@ -118,7 +126,7 @@ float media_pressao (tm dataHora, float temp, float umid, float pressao) {
 
 	ifstream entrada ("../dados.txt");
 
-	// WHILE: Enquanto houver dados no arquivo, ele vai somando as pressões e contando a quantidade de leituras
+	// While: Enquanto houver dados no arquivo, ele vai somando as pressões e contando a quantidade de leituras
 
 	while (ler_leitura(entrada, dataHora, temp, umid, pressao)) {
 		soma_pressao += pressao;
@@ -133,7 +141,8 @@ float media_pressao (tm dataHora, float temp, float umid, float pressao) {
 	return media_pressao;
 }
 
-	// ALOCAÇÃO DINÂMICA
+// Alocação dinâmica 
+
 float* carregar_temperaturas(int& n) {
 	tm dt;
 	float t, u, p;
@@ -153,7 +162,8 @@ float* carregar_temperaturas(int& n) {
 	return v;											
 }
 
-// RECURSÃO
+// Recursão
+
 float soma_recursiva(float* v, int n) {
 	if (n == 0) return 0;								
 	return v[n-1] + soma_recursiva(v, n-1);				
@@ -172,7 +182,8 @@ void ordenar(float* v, int n) {
 	}
 }
 
-// BUSCA BINÁRIA
+// Busca binária 
+
 int busca_binaria(float* v, int n, float alvo) {
 	int ini = 0, fim = n - 1;
 	while (ini <= fim) {
@@ -193,7 +204,7 @@ int main()
 
 	while (controle)
 	{
-		cout << "===== SEJA BEM VINDO =====" << endl;
+		cout << endl << "===== SEJA BEM VINDO =====" << endl << endl;
 		cout << "Caso queira ter acesso ao nosso menu, digite 1." << endl;
 		cout << "Se deseja encerrar o programa, digite 0." << endl;
 		cout << "Digite sua opcao: ";
@@ -201,27 +212,29 @@ int main()
 
 		if (controle)
 		{
-			cout << endl << "===== MENU PRINCIPAL =====" << endl;
+			cout << endl << "===== MENU PRINCIPAL =====" << endl << endl;
 			cout << "1. Inserir Leitura" << endl;
-			cout << "2. Exibir Media" << endl;
+			cout << "2. Exibir Medias" << endl;
 			cout << "3. Exibir Leituras" << endl;
 			cout << "4. Sair" << endl;
+			cout << "Digite sua opcao: ";
 			cin >> opcao;
+			cout << endl << endl;
 
 			switch (opcao)
 			{
 			case 1:
 				cout << "Informe os dados: ";
-				cout << endl << "1. Nome do teste de analise de dados" << endl;
+				cout << endl << "1. Nome do teste de analise de dados: ";
 				cin.ignore();
 				getline(cin, nomeTeste);
-				cout << "2. Data e hora (dia mes ano hora)" << endl; 
+				cout << endl << "2. Data e hora (dia mes ano hora): "; 
 				ler_dataHora(cin, dataHora);
-				cout << "4. Temperatura (graus Celsius)" << endl;
+				cout << endl << "4. Temperatura (graus Celsius): ";
 				cin >> temp;
-				cout << "5. Umidade relativa do ar (porcentagem)" << endl;
+				cout << endl << "5. Umidade relativa do ar (porcentagem): ";
 				cin >> umid;
-				cout << "6. Pressao (atm)" << endl;
+				cout << endl << "6. Pressao (atm): ";
 				cin >> pressao;
 
 				inserir_leituras (nomeTeste, dataHora, temp, umid, pressao);
