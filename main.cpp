@@ -95,12 +95,12 @@ float media_temperatura (tm dataHora, float temp, float umid, float pressao) {
 
 // Função para calcular a média das umidades 
 
-float media_umidade (tm dataHora, float temp, float umid, float pressao) {
+float media_umidade(tm dataHora, float temp, float umid, float pressao) {
 	float media_umid;
 	float soma_umid = 0.0;
 	int quantidade = 0;
 
-	ifstream entrada ("../dados.txt");
+	ifstream entrada("../dados.txt");
 
 	// While: Enquanto houver dados no arquivo, ele vai somando as umidades e contando a quantidade de leituras
 
@@ -143,20 +143,22 @@ float media_pressao (tm dataHora, float temp, float umid, float pressao) {
 
 // Alocação dinâmica 
 
-float* carregar_temperaturas(int& n) {
-	tm dt;
-	float t, u, p;
+float* carregar_temperaturas(int &n) {
+	tm dataHora;
+	float temp, umid, pressao;
 	n = 0;
 
 	ifstream entrada ("../dados.txt");
-	while (ler_leitura(entrada, dt, t, u, p)) n++;		
+	while (ler_leitura(entrada, dataHora, temp, umid, pressao)) n++;		
 
 	float* v = new float[n];							
-	entrada.clear();
-	entrada.seekg(0);									
+	entrada.clear(); // Limpa o estado de fluxo do arquivo. Apaga o indicador de fim de arquivo (eof)
+	entrada.seekg(0); // Volta a posição de leitura para o início do arquivo.					
 
-	for (int i = 0; i < n; i++)
-		ler_leitura(entrada, dt, v[i], u, p);			
+	for (int i = 0; i < n; i++) {
+		ler_leitura(entrada, dataHora, v[i], umid, pressao); 
+		// Armazena as temperaturas no vetor		
+	}
 
 	entrada.close();
 	return v;											
@@ -169,6 +171,7 @@ float soma_recursiva(float* v, int n) {
 	return v[n-1] + soma_recursiva(v, n-1);				
 }
 
+// Método de Ordenação: Insertion Sort 
 
 void ordenar(float* v, int n) {
 	for (int i = 1; i < n; i++) {
@@ -216,7 +219,8 @@ int main()
 			cout << "1. Inserir Leitura" << endl;
 			cout << "2. Exibir Medias" << endl;
 			cout << "3. Exibir Leituras" << endl;
-			cout << "4. Sair" << endl;
+			cout << "4. Encontrar temperatura" << endl;
+			cout << "5. Sair" << endl;
 			cout << "Digite sua opcao: ";
 			cin >> opcao;
 			cout << endl << endl;
@@ -256,8 +260,23 @@ int main()
 				cout << endl;
 				break;
 
-			case 4:
-				cout << "Saida com sucesso" << endl;
+			case 4: {
+				int n;
+				cout << "Temperatura que deseja encontrar nos testes realizados: ";
+				cin >> temp;
+				float* vetor = carregar_temperaturas(n);
+				ordenar(vetor, n);
+				int posicao = busca_binaria(vetor, n, temp);
+				cout << "A temperatura de " << temp;
+				cout << " graus Celsius se encontra na leitura " << posicao << ".";
+				cout << endl;
+				break;
+			} 
+			// As chaves permitem que variáveis sejam declaradas dentro do case 
+
+			case 5:
+				cout << "Programa encerrado." << endl << endl << endl;
+				controle = 0;
 				break;
 
 			default:
@@ -266,5 +285,5 @@ int main()
 		}
 	}
 
-	return 0;
+	return 0;	
 }
