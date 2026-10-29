@@ -1,0 +1,3 @@
+Media Temperatura: 25.7143 graus Celsius
+Media Umidade: 65.5714 %
+Media Pressao: 1.10571 atm

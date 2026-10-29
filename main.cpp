@@ -70,78 +70,13 @@ void exibir_leituras (string nomeTeste, tm dataHora, float temp, float umid, flo
 	entrada.close();
 }
 
-// Função para calcular a média das temperaturas 
+// Recursão
 
-float media_temperatura (string nomeTeste, tm dataHora, float temp, float umid, float pressao) {
-	
-	float media_temp;
-	float soma_temp = 0.0;
-	int quantidade = 0;
-
-	ifstream entrada ("../dados.txt");
-
-	// While: Enquanto houver dados no arquivo, ele vai somando as temperaturas e contando a quantidade de leituras
-
-	while (ler_leitura(entrada, nomeTeste, dataHora, temp, umid, pressao)) {
-		soma_temp += temp;
-		quantidade++;
-	}
-
-	// Calculando a média das temperaturas
-	
-	media_temp = soma_temp / quantidade;
-
-	entrada.close();
-	return media_temp;
+float soma_recursiva(float* v, int n) {
+	if (n == 0) return 0;								
+	return v[n-1] + soma_recursiva(v, n-1);				
 }
 
-// Função para calcular a média das umidades 
-
-float media_umidade(string nomeTeste, tm dataHora, float temp, float umid, float pressao) {
-	float media_umid;
-	float soma_umid = 0.0;
-	int quantidade = 0;
-
-	ifstream entrada("../dados.txt");
-
-	// While: Enquanto houver dados no arquivo, ele vai somando as umidades e contando a quantidade de leituras
-
-	while (ler_leitura(entrada, nomeTeste, dataHora, temp, umid, pressao)) {
-		soma_umid += umid;
-		quantidade++;
-	}
-
-	// Calculando a média das umidades
-	
-	media_umid = soma_umid / quantidade;
-
-	entrada.close();
-	return media_umid;
-}
-
-// Função para calcular a média das pressões
-
-float media_pressao (string nomeTeste, tm dataHora, float temp, float umid, float pressao) {
-	float media_pressao;
-	float soma_pressao = 0.0;
-	int quantidade = 0;
-
-	ifstream entrada ("../dados.txt");
-
-	// While: Enquanto houver dados no arquivo, ele vai somando as pressões e contando a quantidade de leituras
-
-	while (ler_leitura(entrada, nomeTeste, dataHora, temp, umid, pressao)) {
-		soma_pressao += pressao;
-		quantidade++;
-	}
-
-	// Calculando a média das pressões
-	
-	media_pressao = soma_pressao / quantidade;
-
-	entrada.close();
-	return media_pressao;
-}
 
 // Alocação dinâmica 
 
@@ -167,11 +102,109 @@ float* carregar_temperaturas(int &n) {
 	return v;											
 }
 
-// Recursão
+// Carrega temperaturas, umidades e pressões em três vetores dinâmicos.
+// Essa função é utilizada para calcular as três médias.
 
-float soma_recursiva(float* v, int n) {
-	if (n == 0) return 0;								
-	return v[n-1] + soma_recursiva(v, n-1);				
+void carregar_dados(float*& temperaturas, float*& umidades, float*& pressoes, int& n) {
+	tm dataHora;
+	float temp, umid, pressao;
+	string nomeTeste;
+	n = 0; // Inicializa a quantidade de leituras.
+
+	ifstream entrada("../dados.txt");
+
+	// Verifica se o arquivo foi aberto corretamente.
+	if (!entrada.is_open()) {
+		temperaturas = nullptr;
+		umidades = nullptr;
+		pressoes = nullptr;
+		return;
+	}
+
+	// Conta a quantidade de leituras no arquivo.
+	while (ler_leitura(entrada, nomeTeste, dataHora, temp, umid, pressao)) {
+		n++;
+	}
+
+	// Se não houver leituras, não é necessário criar os vetores.
+	if (n == 0) {
+		temperaturas = nullptr;
+		umidades = nullptr;
+		pressoes = nullptr;
+		entrada.close();
+		return;
+	}
+
+	// Aloca os três vetores com a quantidade de leituras encontrada.
+	temperaturas = new float[n];
+	umidades = new float[n];
+	pressoes = new float[n];
+
+	// Volta ao início do arquivo para armazenar os valores nos vetores.
+	entrada.clear();
+	entrada.seekg(0);
+
+	// Segunda leitura: armazena cada valor no vetor correspondente.
+	for (int i = 0; i < n; i++) {
+		ler_leitura(entrada, nomeTeste, dataHora, temp, umid, pressao);
+		temperaturas[i] = temp;
+		umidades[i] = umid;
+		pressoes[i] = pressao;
+	}
+
+	entrada.close(); // Fecha o arquivo após armazenar os dados.
+}
+
+// Calcula as três médias com a função recursiva e salva em medias.txt.
+void calcular_medias() {
+
+	// Declara três ponteiros para armazenar os vetores dinâmicos.
+	float* temperaturas;
+	float* umidades;
+	float* pressoes;
+
+	int n; // Quantidade de leituras encontradas no arquivo.
+
+	// Carrega os dados do arquivo para os três vetores.
+	carregar_dados(temperaturas, umidades, pressoes, n);
+
+	// Verifica se existem leituras para calcular as médias.
+	if (n == 0) {
+		cout << "Nenhuma leitura encontrada ou erro ao abrir dados.txt!" << endl;
+		return;
+	}
+
+	// Soma os valores de cada vetor usando recursão e divide pela quantidade de leituras para obter as médias.
+	float media_temp = soma_recursiva(temperaturas, n) / n;
+	float media_umid = soma_recursiva(umidades, n) / n;
+	float media_pressao = soma_recursiva(pressoes, n) / n;
+
+	// Exibe as três médias na tela.
+	cout << "===== MEDIA =====" << endl;
+	cout << "Media Temperatura: " << media_temp << " graus Celsius" << endl;
+	cout << "Media Umidade: " << media_umid << " %" << endl;
+	cout << "Media Pressao: " << media_pressao << " atm" << endl;
+
+	// Abre o arquivo medias.txt para salvar os resultados.
+	ofstream saida("../medias.txt");
+
+	// Verifica se o arquivo foi aberto corretamente.
+	if (!saida.is_open()) {
+		cout << "Erro ao criar medias.txt!" << endl;
+	} else {
+
+		// Grava as médias no arquivo.
+		saida << "Media Temperatura: " << media_temp << " graus Celsius" << endl;
+		saida << "Media Umidade: " << media_umid << " %" << endl;
+		saida << "Media Pressao: " << media_pressao << " atm" << endl;
+		saida.close();
+		cout << "Medias salvas em medias.txt!" << endl;
+	}
+
+	// Libera a memória dos três vetores.
+	delete[] temperaturas;
+	delete[] umidades;
+	delete[] pressoes;
 }
 
 // Método de Ordenação: Insertion Sort 
@@ -250,10 +283,8 @@ int main()
 				break;
 
 			case 2:
-				cout << "===== MEDIA =====" << endl;
-				cout << "Media Temperatura: " << media_temperatura(nomeTeste, dataHora, temp, umid, pressao) << " graus Celsius" << endl;
-				cout << "Media Umidade: " << media_umidade(nomeTeste, dataHora, temp, umid, pressao) << " %" << endl;
-				cout << "Media Pressao: " << media_pressao(nomeTeste, dataHora, temp, umid, pressao) << " atm" << endl;
+				calcular_medias();
+				cout << endl;
 				break;
 
 			case 3:
