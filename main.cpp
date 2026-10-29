@@ -32,11 +32,10 @@ string formatar_data (tm dataHora) {
 
 }
 
-bool ler_leitura (istream& in, tm& dataHora, float& temp, float& umid, float& pressao) {
-	
-	string nome;
+bool ler_leitura (istream& in, string& nomeTeste, tm& dataHora, float& temp, float& umid, float& pressao) { 
+	// & garante passagem por referência 
 
-	return (in >> ws && getline(in, nome) && ler_dataHora(in, dataHora) && in >> temp >> umid >> pressao);
+	return (in >> ws && getline(in, nomeTeste) && ler_dataHora(in, dataHora) && in >> temp >> umid >> pressao);
 	// ws (white space) retira qualquer quebra de linha ou espaço em branco antes do getline 
 }
 
@@ -54,23 +53,26 @@ void inserir_leituras (string nomeTeste, tm dataHora, float temp, float umid, fl
 
 }
 
-void exibir_leituras (tm dataHora, float temp, float umid, float pressao) {
+void exibir_leituras (string nomeTeste, tm dataHora, float temp, float umid, float pressao) {
 	
 	ifstream entrada("../dados.txt");
 
-	while (ler_leitura(entrada, dataHora, temp, umid, pressao))	{
+	while (ler_leitura(entrada, nomeTeste, dataHora, temp, umid, pressao))	{
+		cout << "Nome do teste: " << nomeTeste << endl;
 		cout << "Data: " << formatar_data(dataHora) << endl;
 		cout << "Temperatura: " << temp << " graus Celsius" << endl;
 		cout << "Umidade: " << umid << " %" << endl;
 		cout << "Pressao: " << pressao << " atm" << endl << endl;
 	}
 
+	cout << "\033[2A";
+
 	entrada.close();
 }
 
 // Função para calcular a média das temperaturas 
 
-float media_temperatura (tm dataHora, float temp, float umid, float pressao) {
+float media_temperatura (string nomeTeste, tm dataHora, float temp, float umid, float pressao) {
 	
 	float media_temp;
 	float soma_temp = 0.0;
@@ -80,7 +82,7 @@ float media_temperatura (tm dataHora, float temp, float umid, float pressao) {
 
 	// While: Enquanto houver dados no arquivo, ele vai somando as temperaturas e contando a quantidade de leituras
 
-	while (ler_leitura(entrada, dataHora, temp, umid, pressao)) {
+	while (ler_leitura(entrada, nomeTeste, dataHora, temp, umid, pressao)) {
 		soma_temp += temp;
 		quantidade++;
 	}
@@ -95,7 +97,7 @@ float media_temperatura (tm dataHora, float temp, float umid, float pressao) {
 
 // Função para calcular a média das umidades 
 
-float media_umidade(tm dataHora, float temp, float umid, float pressao) {
+float media_umidade(string nomeTeste, tm dataHora, float temp, float umid, float pressao) {
 	float media_umid;
 	float soma_umid = 0.0;
 	int quantidade = 0;
@@ -104,7 +106,7 @@ float media_umidade(tm dataHora, float temp, float umid, float pressao) {
 
 	// While: Enquanto houver dados no arquivo, ele vai somando as umidades e contando a quantidade de leituras
 
-	while (ler_leitura(entrada, dataHora, temp, umid, pressao)) {
+	while (ler_leitura(entrada, nomeTeste, dataHora, temp, umid, pressao)) {
 		soma_umid += umid;
 		quantidade++;
 	}
@@ -119,7 +121,7 @@ float media_umidade(tm dataHora, float temp, float umid, float pressao) {
 
 // Função para calcular a média das pressões
 
-float media_pressao (tm dataHora, float temp, float umid, float pressao) {
+float media_pressao (string nomeTeste, tm dataHora, float temp, float umid, float pressao) {
 	float media_pressao;
 	float soma_pressao = 0.0;
 	int quantidade = 0;
@@ -128,7 +130,7 @@ float media_pressao (tm dataHora, float temp, float umid, float pressao) {
 
 	// While: Enquanto houver dados no arquivo, ele vai somando as pressões e contando a quantidade de leituras
 
-	while (ler_leitura(entrada, dataHora, temp, umid, pressao)) {
+	while (ler_leitura(entrada, nomeTeste, dataHora, temp, umid, pressao)) {
 		soma_pressao += pressao;
 		quantidade++;
 	}
@@ -146,17 +148,18 @@ float media_pressao (tm dataHora, float temp, float umid, float pressao) {
 float* carregar_temperaturas(int &n) {
 	tm dataHora;
 	float temp, umid, pressao;
+	string nomeTeste;
 	n = 0;
 
 	ifstream entrada ("../dados.txt");
-	while (ler_leitura(entrada, dataHora, temp, umid, pressao)) n++;		
+	while (ler_leitura(entrada, nomeTeste, dataHora, temp, umid, pressao)) n++;		
 
 	float* v = new float[n];							
 	entrada.clear(); // Limpa o estado de fluxo do arquivo. Apaga o indicador de fim de arquivo (eof)
 	entrada.seekg(0); // Volta a posição de leitura para o início do arquivo.					
 
 	for (int i = 0; i < n; i++) {
-		ler_leitura(entrada, dataHora, v[i], umid, pressao); 
+		ler_leitura(entrada, nomeTeste, dataHora, v[i], umid, pressao); 
 		// Armazena as temperaturas no vetor		
 	}
 
@@ -207,7 +210,7 @@ int main()
 
 	while (controle)
 	{
-		cout << endl << "===== SEJA BEM VINDO =====" << endl << endl;
+		cout << endl << endl << "\033[36m===== SEJA BEM VINDO =====\033[0m" << endl << endl;
 		cout << "Caso queira ter acesso ao nosso menu, digite 1." << endl;
 		cout << "Se deseja encerrar o programa, digite 0." << endl;
 		cout << "Digite sua opcao: ";
@@ -215,15 +218,15 @@ int main()
 
 		if (controle)
 		{
-			cout << endl << "===== MENU PRINCIPAL =====" << endl << endl;
+			cout << endl << "\033[31m===== MENU PRINCIPAL =====\033[0m" << endl << endl;
 			cout << "1. Inserir Leitura" << endl;
 			cout << "2. Exibir Medias" << endl;
 			cout << "3. Exibir Leituras" << endl;
-			cout << "4. Encontrar temperatura" << endl;
+			cout << "4. Encontrar temperatura por busca binaria em vetor ordenado" << endl;
 			cout << "5. Sair" << endl;
 			cout << "Digite sua opcao: ";
 			cin >> opcao;
-			cout << endl << endl;
+			cout << endl;
 
 			switch (opcao)
 			{
@@ -241,34 +244,33 @@ int main()
 				cout << endl << "6. Pressao (atm): ";
 				cin >> pressao;
 
-				inserir_leituras (nomeTeste, dataHora, temp, umid, pressao);
+				inserir_leituras(nomeTeste, dataHora, temp, umid, pressao);
 
 				cout << endl;
 				break;
 
 			case 2:
 				cout << "===== MEDIA =====" << endl;
-				cout << "Media Temperatura: " << media_temperatura(dataHora, temp, umid, pressao) << " graus Celsius" << endl;
-				cout << "Media Umidade: " << media_umidade(dataHora, temp, umid, pressao) << " %" << endl;
-				cout << "Media Pressao: " << media_pressao(dataHora, temp, umid, pressao) << " atm" << endl;
-				cout << endl;
+				cout << "Media Temperatura: " << media_temperatura(nomeTeste, dataHora, temp, umid, pressao) << " graus Celsius" << endl;
+				cout << "Media Umidade: " << media_umidade(nomeTeste, dataHora, temp, umid, pressao) << " %" << endl;
+				cout << "Media Pressao: " << media_pressao(nomeTeste, dataHora, temp, umid, pressao) << " atm" << endl;
 				break;
 
 			case 3:
 				cout << "===== LEITURAS =====" << endl;
-				exibir_leituras(dataHora, temp, umid, pressao);
+				exibir_leituras(nomeTeste, dataHora, temp, umid, pressao);
 				cout << endl;
 				break;
 
 			case 4: {
 				int n;
-				cout << "Temperatura que deseja encontrar nos testes realizados: ";
+				cout << "Digite a temperatura que deseja encontrar nos testes realizados: ";
 				cin >> temp;
 				float* vetor = carregar_temperaturas(n);
 				ordenar(vetor, n);
 				int posicao = busca_binaria(vetor, n, temp);
-				cout << "A temperatura de " << temp;
-				cout << " graus Celsius se encontra na leitura " << posicao << ".";
+				cout << endl << "===== RESULTADO =====" << endl << "A temperatura de " << temp;
+				cout << " graus Celsius se encontra na posicao " << posicao << " do vetor ordenado";
 				cout << endl;
 				break;
 			} 
