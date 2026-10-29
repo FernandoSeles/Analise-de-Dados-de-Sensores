@@ -294,15 +294,20 @@ void ordenar(float* v, int n) {
 
 // Busca binária 
 
+// Busca binária recursiva (função auxiliar): recebe os limites do intervalo.
+int busca_binaria_rec(float* v, int ini, int fim, float alvo) {
+	if (ini > fim) return -1;                 
+
+	int meio = ini + (fim - ini) / 2;
+
+	if (v[meio] == alvo) return meio;         
+	if (v[meio] < alvo)
+		return busca_binaria_rec(v, meio + 1, fim, alvo);   
+	return busca_binaria_rec(v, ini, meio - 1, alvo);       
+}
+
 int busca_binaria(float* v, int n, float alvo) {
-	int ini = 0, fim = n - 1;
-	while (ini <= fim) {
-		int meio = (ini + fim) / 2;
-		if (v[meio] == alvo) return meio;
-		if (v[meio] < alvo) ini = meio + 1;
-		else fim = meio - 1;
-	}
-	return -1;
+	return busca_binaria_rec(v, 0, n - 1, alvo);
 }
 
 int main()
