@@ -5,6 +5,12 @@
 
 using namespace std;
 
+struct Leitura {
+	string nomeTeste;
+	tm dataHora;
+	float temp, umid, pressao;
+};
+
 bool ler_dataHora (istream& in, tm& dataHora){ 
 /* istream é uma classe que representa um fluxo de entrada que admite diferentes fontes.
 Tanto de teclado, quanto de arquivos */
@@ -12,15 +18,12 @@ Tanto de teclado, quanto de arquivos */
 	int mes;
 	dataHora = tm{}; // Essa linha inicializa todos os campos numéricos da struct tm com zero.
 
-	if (!(in >> dataHora.tm_mday >> mes >>  dataHora.tm_year >> dataHora.tm_hour)) return false;
+	if (!(in >> dataHora.tm_mday >> mes >> dataHora.tm_year >> dataHora.tm_hour)) return false;
 	// Verifica se a leitura não foi bem-sucedida. Se falhar, a função executa return false; e termina imediatamente.
 
 	dataHora.tm_mon = mes - 1;
 	dataHora.tm_year = dataHora.tm_year - 1900;
-	dataHora.tm_isdst = -1; 
-	/* tm_isdt = -1 faz com que a informação de horário de verão fique desconhecida. Faz com que a biblioteca 
-	determine essa informação em futuras conversões de data com esse campo */
-
+	
 	return true;
 }
 
@@ -32,37 +35,37 @@ string formatar_data (tm dataHora) {
 
 }
 
-bool ler_leitura (istream& in, string& nomeTeste, tm& dataHora, float& temp, float& umid, float& pressao) { 
+bool ler_leitura (istream& in, Leitura& leitura) { 
 	// & garante passagem por referência 
 
-	return (in >> ws && getline(in, nomeTeste) && ler_dataHora(in, dataHora) && in >> temp >> umid >> pressao);
+	return (in >> ws && getline(in, leitura.nomeTeste) && ler_dataHora(in, leitura.dataHora) && in >> leitura.temp >> leitura.umid >> leitura.pressao);
 	// ws (white space) retira qualquer quebra de linha ou espaço em branco antes do getline 
 }
 
-void inserir_leituras (string nomeTeste, tm dataHora, float temp, float umid, float pressao) {
+void inserir_leituras (Leitura leitura) {
 
 	ofstream saida ("../dados.txt", ios::app);	
 	// ../ faz o programa procurar dados.txt na pasta principal e não em output, ou seja, volta uma pasta 
 	// ios::app acrescenta as leituras no final sem apagar as leituras anteriores 
 
 	saida << endl << endl;
-	saida << nomeTeste << endl << dataHora.tm_mday << " " << dataHora.tm_mon + 1 << " " << dataHora.tm_year + 1900 << endl << dataHora.tm_hour;	
-	saida << endl << temp << endl << umid << endl << pressao;
+	saida << leitura.nomeTeste << endl << leitura.dataHora.tm_mday << " " << leitura.dataHora.tm_mon + 1 << " " << leitura.dataHora.tm_year + 1900 << endl << leitura.dataHora.tm_hour;	
+	saida << endl << leitura.temp << endl << leitura.umid << endl << leitura.pressao;
 
 	saida.close();
 
 }
 
-void exibir_leituras (string nomeTeste, tm dataHora, float temp, float umid, float pressao) {
+void exibir_leituras (Leitura& leitura) {
 	
 	ifstream entrada("../dados.txt");
 
-	while (ler_leitura(entrada, nomeTeste, dataHora, temp, umid, pressao))	{
-		cout << "Nome do teste: " << nomeTeste << endl;
-		cout << "Data: " << formatar_data(dataHora) << endl;
-		cout << "Temperatura: " << temp << " graus Celsius" << endl;
-		cout << "Umidade: " << umid << " %" << endl;
-		cout << "Pressao: " << pressao << " atm" << endl << endl;
+	while (ler_leitura(entrada, leitura))	{
+		cout << "Nome do teste: " << leitura.nomeTeste << endl;
+		cout << "Data: " << formatar_data(leitura.dataHora) << endl;
+		cout << "Temperatura: " << leitura.temp << " graus Celsius" << endl;
+		cout << "Umidade: " << leitura.umid << " %" << endl;
+		cout << "Pressao: " << leitura.pressao << " atm" << endl << endl;
 	}
 
 	cout << "\033[2A";
@@ -81,20 +84,19 @@ float soma_recursiva(float* v, int n) {
 // Alocação dinâmica 
 
 float* carregar_temperaturas(int &n) {
-	tm dataHora;
-	float temp, umid, pressao;
-	string nomeTeste;
+	Leitura leitura;
 	n = 0;
 
 	ifstream entrada ("../dados.txt");
-	while (ler_leitura(entrada, nomeTeste, dataHora, temp, umid, pressao)) n++;		
+	while (ler_leitura(entrada, leitura)) n++;		
 
 	float* v = new float[n];							
 	entrada.clear(); // Limpa o estado de fluxo do arquivo. Apaga o indicador de fim de arquivo (eof)
 	entrada.seekg(0); // Volta a posição de leitura para o início do arquivo.					
 
 	for (int i = 0; i < n; i++) {
-		ler_leitura(entrada, nomeTeste, dataHora, v[i], umid, pressao); 
+		ler_leitura(entrada, leitura);
+		v[i] = leitura.temp;
 		// Armazena as temperaturas no vetor		
 	}
 
@@ -106,9 +108,7 @@ float* carregar_temperaturas(int &n) {
 // Essa função é utilizada para calcular as três médias.
 
 void carregar_dados(float*& temperaturas, float*& umidades, float*& pressoes, int& n) {
-	tm dataHora;
-	float temp, umid, pressao;
-	string nomeTeste;
+	Leitura leitura;
 	n = 0; // Inicializa a quantidade de leituras.
 
 	ifstream entrada("../dados.txt");
@@ -122,7 +122,7 @@ void carregar_dados(float*& temperaturas, float*& umidades, float*& pressoes, in
 	}
 
 	// Conta a quantidade de leituras no arquivo.
-	while (ler_leitura(entrada, nomeTeste, dataHora, temp, umid, pressao)) {
+	while (ler_leitura(entrada, leitura)) {
 		n++;
 	}
 
@@ -146,10 +146,10 @@ void carregar_dados(float*& temperaturas, float*& umidades, float*& pressoes, in
 
 	// Segunda leitura: armazena cada valor no vetor correspondente.
 	for (int i = 0; i < n; i++) {
-		ler_leitura(entrada, nomeTeste, dataHora, temp, umid, pressao);
-		temperaturas[i] = temp;
-		umidades[i] = umid;
-		pressoes[i] = pressao;
+		ler_leitura(entrada, leitura);
+		temperaturas[i] = leitura.temp;
+		umidades[i] = leitura.umid;
+		pressoes[i] = leitura.pressao;
 	}
 
 	entrada.close(); // Fecha o arquivo após armazenar os dados.
@@ -237,9 +237,7 @@ int busca_binaria(float* v, int n, float alvo) {
 int main()
 {
 	int opcao, controle = 1;
-	string nomeTeste;
-	tm dataHora;
-	float temp, umid, pressao;
+	Leitura leitura;
 
 	while (controle)
 	{
@@ -251,7 +249,7 @@ int main()
 
 		if (controle)
 		{
-			cout << endl << "\033[31m===== MENU PRINCIPAL =====\033[0m" << endl << endl;
+			cout << endl << "\033[33m===== MENU PRINCIPAL =====\033[0m" << endl << endl;
 			cout << "1. Inserir Leitura" << endl;
 			cout << "2. Exibir Medias" << endl;
 			cout << "3. Exibir Leituras" << endl;
@@ -267,17 +265,17 @@ int main()
 				cout << "Informe os dados: ";
 				cout << endl << "1. Nome do teste de analise de dados: ";
 				cin.ignore();
-				getline(cin, nomeTeste);
+				getline(cin, leitura.nomeTeste);
 				cout << endl << "2. Data e hora (dia mes ano hora): "; 
-				ler_dataHora(cin, dataHora);
+				ler_dataHora(cin, leitura.dataHora);
 				cout << endl << "4. Temperatura (graus Celsius): ";
-				cin >> temp;
+				cin >> leitura.temp;
 				cout << endl << "5. Umidade relativa do ar (porcentagem): ";
-				cin >> umid;
+				cin >> leitura.umid;
 				cout << endl << "6. Pressao (atm): ";
-				cin >> pressao;
+				cin >> leitura.pressao;
 
-				inserir_leituras(nomeTeste, dataHora, temp, umid, pressao);
+				inserir_leituras(leitura);
 
 				cout << endl;
 				break;
@@ -289,18 +287,18 @@ int main()
 
 			case 3:
 				cout << "===== LEITURAS =====" << endl;
-				exibir_leituras(nomeTeste, dataHora, temp, umid, pressao);
+				exibir_leituras(leitura);
 				cout << endl;
 				break;
 
 			case 4: {
 				int n;
 				cout << "Digite a temperatura que deseja encontrar nos testes realizados: ";
-				cin >> temp;
+				cin >> leitura.temp;
 				float* vetor = carregar_temperaturas(n);
 				ordenar(vetor, n);
-				int posicao = busca_binaria(vetor, n, temp);
-				cout << endl << "===== RESULTADO =====" << endl << "A temperatura de " << temp;
+				int posicao = busca_binaria(vetor, n, leitura.temp);
+				cout << endl << "===== RESULTADO =====" << endl << "A temperatura de " << leitura.temp;
 				cout << " graus Celsius se encontra na posicao " << posicao << " do vetor ordenado";
 				cout << endl;
 				break;
@@ -308,7 +306,7 @@ int main()
 			// As chaves permitem que variáveis sejam declaradas dentro do case 
 
 			case 5:
-				cout << "Programa encerrado." << endl << endl << endl;
+				cout << "\033[31m===== PROGRAMA ENCERRADO =====\033[0m" << endl << endl << endl;
 				controle = 0;
 				break;
 
@@ -316,6 +314,9 @@ int main()
 				cout << "Opcao invalida!" << endl;
 			}
 		}
+        else {
+            cout << endl << "\033[31m===== PROGRAMA ENCERRADO =====\033[0m" << endl << endl;
+        }
 	}
 
 	return 0;	

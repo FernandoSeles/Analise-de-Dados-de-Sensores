@@ -46,3 +46,24 @@ Teste Especial
 25
 59
 1.018
+
+Teste Lab
+28 10 2026
+21
+29
+62
+1.041
+
+Teste Rapido
+29 10 2026
+15
+26
+69
+1.109
+
+Teste Sensorial 
+27 4 2018
+20
+28
+59
+1.262
