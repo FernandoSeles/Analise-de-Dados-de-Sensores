@@ -376,7 +376,7 @@ int main()
 				if (n == 0) {
 					cout << "Nenhuma leitura encontrada!" << endl;
 					delete[] vetor;
-					break;
+					break;																				
 				}
 
 				ordenar(vetor, n);
