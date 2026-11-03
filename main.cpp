@@ -96,6 +96,9 @@ void inserir_leituras (Leitura leitura) {
 
 	ifstream verificacao("../dados.csv");
 	bool cabecalho = !verificacao.is_open() || verificacao.peek() == EOF;
+	/* peek() olha a posição posterior a que o cursor se encontra no momento atual. EOF (end of file) significa 
+	o fim do arquivo. Esse conjunto verifica se o arquivo está vazio. */
+
 	verificacao.close();
 
 	ofstream saida ("../dados.csv", ios::app);	
@@ -107,6 +110,7 @@ void inserir_leituras (Leitura leitura) {
 		return;
 	}
 
+	// Criação de cabeçalho 
 	if (cabecalho) {
 		saida << "Nome,Data,Hora,Temperatura,Umidade,Pressao" << endl;
 	}
@@ -146,45 +150,67 @@ float soma_recursiva(float* v, int n) {
 	return v[n-1] + soma_recursiva(v, n-1);				
 }
 
+// Redimensionamento de vetor dinâmico
+
+void redimensionar(float*& v, int tamanhoAtual, int novoTamanho) {
+
+	float* novoVetor = new float[novoTamanho];
+
+	for (int i = 0; i < tamanhoAtual; i++) {
+		novoVetor[i] = v[i];
+	}
+
+	delete[] v;
+	v = novoVetor;
+}
 
 // Alocação dinâmica 
 
-float* carregar_temperaturas(int &n) {
+float* carregar_temperaturas(int& n) {
 	Leitura leitura;
 	n = 0;
 
-	ifstream entrada ("../dados.csv");
-	while (ler_leitura(entrada, leitura)) n++;		
+	int capacidade = 2;
 
-	if (n == 0) {
-		entrada.close();
-		return nullptr;
-	}
+	ifstream entrada("../dados.csv");
 
-	float* v = new float[n];							
-	entrada.clear(); // Limpa o estado de fluxo do arquivo. Apaga o indicador de fim de arquivo (eof)
-	entrada.seekg(0); // Volta a posição de leitura para o início do arquivo.					
+	if (!entrada.is_open()) return nullptr;
 
-	for (int i = 0; i < n; i++) {
-		ler_leitura(entrada, leitura);
-		v[i] = leitura.temp;
-		// Armazena as temperaturas no vetor		
+	float* v = new float[capacidade];
+
+	while (ler_leitura(entrada, leitura)) {
+
+		if (n == capacidade) {
+			capacidade *= 2;
+			redimensionar(v, n, capacidade);
+		}
+
+		v[n] = leitura.temp;
+		n++;
 	}
 
 	entrada.close();
-	return v;											
+
+	if (n == 0) {
+		delete[] v;
+		return nullptr;
+	}
+
+	return v;
 }
 
 // Carrega temperaturas, umidades e pressões em três vetores dinâmicos.
 // Essa função é utilizada para calcular as três médias.
 
 void carregar_dados(float*& temperaturas, float*& umidades, float*& pressoes, int& n) {
+
 	Leitura leitura;
-	n = 0; // Inicializa a quantidade de leituras.
+	n = 0;
+
+	int capacidade = 2;
 
 	ifstream entrada("../dados.csv");
 
-	// Verifica se o arquivo foi aberto corretamente.
 	if (!entrada.is_open()) {
 		temperaturas = nullptr;
 		umidades = nullptr;
@@ -192,38 +218,38 @@ void carregar_dados(float*& temperaturas, float*& umidades, float*& pressoes, in
 		return;
 	}
 
-	// Conta a quantidade de leituras no arquivo.
+	temperaturas = new float[capacidade];
+	umidades = new float[capacidade];
+	pressoes = new float[capacidade];
+
 	while (ler_leitura(entrada, leitura)) {
+
+		if (n == capacidade) {
+			capacidade *= 2;
+
+			redimensionar(temperaturas, n, capacidade);
+			redimensionar(umidades, n, capacidade);
+			redimensionar(pressoes, n, capacidade);
+		}
+
+		temperaturas[n] = leitura.temp;
+		umidades[n] = leitura.umid;
+		pressoes[n] = leitura.pressao;
+
 		n++;
 	}
 
-	// Se não houver leituras, não é necessário criar os vetores.
+	entrada.close();
+
 	if (n == 0) {
+		delete[] temperaturas;
+		delete[] umidades;
+		delete[] pressoes;
+
 		temperaturas = nullptr;
 		umidades = nullptr;
 		pressoes = nullptr;
-		entrada.close();
-		return;
 	}
-
-	// Aloca os três vetores com a quantidade de leituras encontrada.
-	temperaturas = new float[n];
-	umidades = new float[n];
-	pressoes = new float[n];
-
-	// Volta ao início do arquivo para armazenar os valores nos vetores.
-	entrada.clear();
-	entrada.seekg(0);
-
-	// Segunda leitura: armazena cada valor no vetor correspondente.
-	for (int i = 0; i < n; i++) {
-		ler_leitura(entrada, leitura);
-		temperaturas[i] = leitura.temp;
-		umidades[i] = leitura.umid;
-		pressoes[i] = leitura.pressao;
-	}
-
-	entrada.close(); // Fecha o arquivo após armazenar os dados.
 }
 
 // Calcula as três médias com a função recursiva e salva em medias.txt.
